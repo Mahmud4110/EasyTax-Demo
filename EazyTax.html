@@ -1,0 +1,297 @@
+<!--
+<!DOCTYPE html>
+<html lang="en" class="h-full antialiased">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EasyTax — Live Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui; }
+    .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    /* The 2025 Dark Mode Gradient */
+    .gradient-bg { background: radial-gradient(circle at 30% 70%, #0a3d2a 0%, #000000 60%); }
+    /* Glassmorphism */
+    .glass { background: rgba(15, 15, 15, 0.65); backdrop-filter: blur(20px); border: 1px solid rgba(34, 197, 94, 0.15); }
+    /* Terminal Pulse */
+    .pulse-green { animation: pulse-green 2s infinite; }
+    @keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); } 70% { box-shadow: 0 0 0 20px rgba(34,197,94,0); } }
+    /* Log Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .log-entry { animation: fadeIn 0.4s ease-out forwards; }
+    
+    /* Phone Styling */
+    .phone-mockup {
+      border: 12px solid #1a1a1a;
+      border-radius: 50px;
+      box-shadow: 0 0 0 2px #333, 0 30px 60px -10px rgba(0,0,0,0.8);
+      position: relative;
+      background: #000;
+      overflow: hidden;
+      z-index: 10;
+    }
+    .notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 30px; background: #1a1a1a;
+      border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;
+      z-index: 20;
+    }
+  </style>
+</head>
+
+<body class="h-screen gradient-bg flex items-center justify-center overflow-hidden" x-data="taxDemo()">
+
+  <div class="grid lg:grid-cols-2 gap-16 max-w-6xl w-full mx-auto px-6 z-10 items-center h-[650px]">
+
+    <div class="flex justify-center flex-col items-center h-full justify-center">
+      <div class="text-[10px] font-mono text-gray-500 mb-6 tracking-[0.2em] uppercase">User View • iOS 19</div>
+      
+      <div class="phone-mockup w-[340px] h-[680px] bg-white text-gray-900 relative">
+        <div class="notch"></div>
+        
+        <div class="flex justify-between px-6 pt-3 text-[10px] font-bold text-gray-900">
+          <span>9:41</span>
+          <div class="flex gap-1"><i class="fas fa-signal"></i><i class="fas fa-wifi"></i><i class="fas fa-battery-full"></i></div>
+        </div>
+
+        <div class="h-full pt-8 px-6 pb-6 flex flex-col relative bg-gray-50">
+          
+          <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-2">
+               <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-green-600/20"><i class="fas fa-calculator"></i></div>
+               <span class="font-extrabold text-xl tracking-tight text-gray-900">EasyTax</span>
+            </div>
+            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i class="fas fa-user text-gray-500"></i></div>
+          </div>
+
+          <div class="flex-1 flex flex-col justify-center transition-all duration-500" x-ref="appContent">
+            
+            <template x-if="step === 0">
+              <div class="text-center space-y-6">
+                <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto text-green-600 text-3xl mb-4 border border-green-100">
+                  <i class="fas fa-fingerprint"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 leading-tight">Tax Season.</h2>
+                    <h2 class="text-3xl font-black text-gray-300 leading-tight">Done.</h2>
+                </div>
+                <p class="text-gray-500 text-sm font-medium">Auto-sync banks. Auto-file. Zero stress.</p>
+                <button @click="startSequence()" class="w-full bg-black text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:scale-[1.02] transition-transform active:scale-95">
+                  Start with BVN
+                </button>
+              </div>
+            </template>
+
+            <template x-if="step === 1">
+              <div class="text-center space-y-4">
+                <div class="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <h3 class="text-xl font-bold">Syncing Financials...</h3>
+                <div class="space-y-2 text-sm text-gray-500 pt-4">
+                  <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-6 h-6 bg-orange-100 rounded flex items-center justify-center text-orange-600"><i class="fas fa-university"></i></div> 
+                    <span class="font-semibold">GTBank</span> 
+                    <span class="ml-auto text-green-600 text-[10px] font-mono bg-green-50 px-2 py-1 rounded">SYNCED</span>
+                  </div>
+                  <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center text-blue-600"><i class="fas fa-wallet"></i></div> 
+                    <span class="font-semibold">Moniepoint</span> 
+                    <span class="ml-auto text-green-600 text-[10px] font-mono bg-green-50 px-2 py-1 rounded">SYNCED</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template x-if="step === 2">
+              <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 text-center transform transition-all">
+                <p class="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-2">2025 TAX LIABILITY</p>
+                <h1 class="text-5xl font-black text-gray-900 mb-2">₦0.00</h1>
+                <div class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold mb-6 border border-green-200">
+                  <i class="fas fa-check-circle mr-1"></i> SMALL COMPANY EXEMPT
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4 text-left text-sm space-y-3 mb-2 border border-gray-100">
+                  <div class="flex justify-between"><span>Total Revenue</span> <span class="font-bold">₦892,450</span></div>
+                  <div class="flex justify-between text-gray-400"><span>Allowable Exp.</span> <span>-₦120,000</span></div>
+                  <div class="flex justify-between text-green-600 font-bold border-t border-gray-200 pt-2"><span>Tax Payable</span> <span>₦0.00</span></div>
+                </div>
+              </div>
+            </template>
+
+            <template x-if="step === 3">
+              <div class="text-center relative pt-10">
+                 <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto text-white text-4xl mb-6 shadow-xl shadow-green-500/40">
+                  <i class="fas fa-check"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">You are Clear!</h2>
+                <p class="text-gray-500 text-sm mb-8">FIRS Tax Clearance Certificate (TCC) has been issued.</p>
+                
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-lg relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
+                  <div class="absolute top-0 right-0 bg-green-600 text-white text-[9px] px-2 py-1 rounded-bl font-bold tracking-wider">OFFICIAL</div>
+                  <div class="flex items-center gap-4">
+                    <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
+                    <div class="text-left">
+                      <div class="font-bold text-sm text-gray-900">TCC_2026_Aisha.pdf</div>
+                      <div class="text-[10px] text-gray-400 mt-0.5">Verified by FIRS • Just now</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col h-[600px] pt-10">
+      <div class="text-[10px] font-mono text-gray-500 mb-3 tracking-[0.2em] flex justify-between">
+        <span>EasyTax Intelligence Engine</span>
+        <span class="text-green-400 animate-pulse flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> LIVE</span>
+      </div>
+      
+      <div class="glass rounded-2xl p-6 flex-1 font-mono text-sm leading-relaxed overflow-hidden flex flex-col shadow-2xl">
+        <div class="flex gap-2 mb-6 opacity-60">
+          <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-green-500 pulse-green"></div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto space-y-2" id="terminal-logs">
+          <template x-for="log in logs" :key="log.time">
+            <div class="log-entry opacity-0 flex gap-3 text-[13px]">
+                <span class="text-gray-600 shrink-0" x-text="log.time"></span>
+                <span class="text-gray-300" x-html="log.msg"></span>
+            </div>
+          </template>
+          <div class="animate-pulse text-green-500 mt-2">_</div>
+        </div>
+
+        <div class="mt-5 pt-5 border-t border-gray-800/50 grid grid-cols-3 gap-6 text-[10px] uppercase tracking-wider">
+          <div><div class="text-gray-600 mb-1">Latency</div><div class="text-white font-bold text-xs">11ms</div></div>
+          <div><div class="text-gray-600 mb-1">Encryption</div><div class="text-green-400 font-bold text-xs">AES-256-GCM</div></div>
+          <div><div class="text-gray-600 mb-1">Compliance</div><div class="text-white font-bold text-xs">FIRS • CBN • NDPC</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function taxDemo() {
+      return {
+        step: 0,
+        logs: [], // Init empty
+        
+        init() {
+            this.addLog('INIT System Ready. Waiting for user input...');
+        },
+
+        addLog(msg) {
+          const now = new Date();
+          const timestamp = now.toTimeString().slice(0,8);
+          
+          const prefixes = {
+            init: '→',
+            api: '↗',
+            success: '✓',
+            engine: '⚡',
+            firs: '▷',
+            done: '✓'
+          };
+          
+          const colors = {
+            init: 'text-gray-500',
+            api: 'text-cyan-400',
+            success: 'text-green-400',
+            engine: 'text-yellow-400',
+            firs: 'text-purple-400',
+            done: 'text-green-300 font-bold'
+          };
+
+          // Extract key (first word) to determine style
+          const firstWord = msg.split(' ')[0].toLowerCase();
+          const key = prefixes[firstWord] ? firstWord : 'init';
+          const prefix = prefixes[key];
+          const color = colors[key];
+          
+          // Remove the key from the display message
+          const cleanMsg = msg.substring(msg.indexOf(' ') + 1);
+          
+          this.logs.push({
+            time: timestamp,
+            msg: `<span class="${color} mr-2">${prefix}</span> ${cleanMsg}`
+          });
+
+          this.$nextTick(() => {
+            const el = document.getElementById('terminal-logs');
+            el.scrollTop = el.scrollHeight;
+          });
+        },
+
+        startSequence() {
+          this.step = 1;
+          this.addLog('INIT User Sequence Started: ID #8821');
+          this.addLog('API Verifying Device Fingerprint...');
+          
+          // 0-3s: Bank Sync
+          setTimeout(() => this.addLog('API GET /nibss/bvn_lookup payload: {id: ***5021}'), 800);
+          setTimeout(() => this.addLog('SUCCESS BVN Verified: "AISHA BELLO"'), 1800);
+          setTimeout(() => this.addLog('API OpenBanking Aggregation starting...'), 2500);
+          
+          // 3-6s: Found Accounts
+          setTimeout(() => {
+            this.addLog('SUCCESS Connected: GTBank (SAV) - ₦210,400.00');
+            this.addLog('SUCCESS Connected: Moniepoint (BIZ) - ₦687,000.00');
+          }, 3500);
+
+          // 7s: Logic Engine Calculation
+          setTimeout(() => {
+            this.step = 2; // Show Calculator
+            this.addLog('ENGINE Total detected revenue: ₦897,400.00');
+            this.addLog('ENGINE Applying "Small Company" Exemption Rule (S.23 CITA)...');
+          }, 7000);
+
+          // 12s: Zero Tax Result
+          setTimeout(() => {
+             this.addLog('SUCCESS Tax Liability Calculated: ₦0.00');
+             this.addLog('ENGINE Preparing CIT Self-Assessment Form 001...');
+          }, 9000);
+
+          // 15s: Filing
+          setTimeout(() => {
+             this.addLog('FIRS Connecting to TaxProMax Gateway...');
+             this.addLog('FIRS Uploading encrypted XML payload...');
+          }, 15000);
+
+          // 20s: Approval
+          setTimeout(() => {
+             this.addLog('SUCCESS FIRS Acknowledgment Received (200 OK)');
+             this.addLog('ENGINE Generating TCC PDF...');
+             this.step = 3; // Success Screen
+             confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#22c55e', '#ffffff', '#fbbf24'],
+                disableForReducedMotion: true
+             });
+          }, 20000);
+
+          // 25s: Final
+          setTimeout(() => {
+             this.addLog('DONE Session Closed. User compliant.');
+          }, 25000);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+-->
